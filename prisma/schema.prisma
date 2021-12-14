@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid())
+  agoraUid       Int             @unique @default(autoincrement())
+  username       String          @unique
+  email          String          @unique
+  nomorAnggota   String          @unique
+  phoneNumber    String          @unique
+  fullName       String
+  passwordDigest String?
+  role           Role            @default(USER)
+  twoFactorAuth  Boolean         @default(false)
+  channels       GroupChannel[]
+  profilePics    ProfilePicture?
+
+  @@map("users")
+}
+
+model ProfilePicture {
+  id           String @id @default(uuid())
+  userId       String @unique
+  owner        User   @relation(references: [id], fields: [userId])
+  fieldname    String
+  originalname String
+  encoding     String
+  mimetype     String
+  size         Int
+  destination  String
+  filename     String
+  path         String
+
+  @@map("profile_pics")
+}
+
+model GroupChannel {
+  id           String      @id @default(uuid())
+  channelType  ChannelType @default(CONTACT)
+  channelName  String      @default("Contact")
+  participants User[]
+
+  @@map("group_channels")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ChannelType {
+  GROUP
+  CONTACT
+}
